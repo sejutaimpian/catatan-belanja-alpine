@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Catatan Belanja AlpineJS</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="icon" href="https://tailwindcss.com/favicons/favicon-16x16.png?v=3">
+    <script defer src="https://cdn.jsdelivr.net/npm/alpinejs@3.12.3/dist/cdn.min.js"></script>
+</head>
+
+<body class="text-4xl font-['Comfortaa',sans-serif] text-slate-800 bg-slate-100">
+    <div x-data class="w-full md:w-2/3 mx-auto grid grid-rows-1">
+        <h1 class="font-[Borel] text-center bg-slate-800 text-white text-3xl md:text-6xl pt-10 pb-4">Catatan Belanjaku
+            📝
+        </h1>
+        <form @submit.prevent="$store.grocery.submitItem()"
+            class="bg-amber-400 flex md:gap-1 flex-wrap py-4 md:py-11 text-2xl px-2 md:px-4 items-center justify-center">
+            <h3 class="w-full md:w-4/12 md:text-4xl">Hari ini belanja apa kita?</h3>
+            <select class="w-3/12 md:w-1/12 rounded-3xl py-2 px-2" x-model="$store.grocery.kty">
+                <template x-for="kty in 20">
+                    <option :value="kty" x-text="kty"></option>
+                </template>
+            </select>
+            <input class="w-9/12 md:w-4/12 px-2 rounded-3xl py-2" type="text" placeholder="Nama Barang..."
+                x-model="$store.grocery.barang" />
+            <button
+                class="w-1/2 md:w-2/12 mt-2 md:mt-0 bg-slate-800 text-white font-bold rounded-3xl text-lg py-2 px-2">Tambah</button>
+        </form>
+        <div
+            class="bg-[url(img/paper-bg.jpg)] bg-repeat-y bg-local mb-4 text-slate-800 pt-8 flex justify-between flex-col items-center min-h-[10rem]">
+            <ul class="w-10/12 flex flex-col items-center gap-4">
+                <template x-effect="$store.grocery.sortingItems($store.grocery.sortBy)"
+                    x-for="(item, index) in $store.grocery.sortedItems" :key="item.id">
+                    <li class="flex items-center gap-2 md:gap-6">
+                        <template x-if="item.checked">
+                            <input class="w-6 h-6 accent-slate-800" type="checkbox" checked
+                                @change="item.checked = !item.checked" />
+                        </template>
+                        <template x-if="!item.checked">
+                            <input class="w-6 h-6 accent-slate-800" type="checkbox"
+                                @change="item.checked = !item.checked" />
+                        </template>
+                        <div :class="item.checked ? 'line-through' : ''">
+                            <span x-text="item.quantity">2</span>
+                            <span x-text="item.name">Kopi</span>
+                        </div>
+                        <button class="bg-red-600 text-4xl text-slate-100 w-6 h-6 flex items-center justify-center"
+                            @click="$store.grocery.deleteItem(index)">&times;</button>
+                    </li>
+                </template>
+            </ul>
+        </div>
+        <div
+            class="bg-lime-500 w-full flex flex-wrap gap-4 md:gap-0 flex-col md:flex-row md:justify-evenly py-8 text-center">
+            <select :value="$store.grocery.sortBy" @change="$store.grocery.setSortBy($event.target.value)"
+                class="py-3 px-8 text-2xl w-2/3 md:w-7/12 md:mx-0 mx-auto justify-center items-center">
+                <option value="input">Urutkan berdasarkan urutan input</option>
+                <option value="name">Urutkan berdasarkan nama barang</option>
+                <option value="checked">Urutkan berdasarkan ceklis</option>
+            </select>
+            <button class="py-2 px-4 mx-3 md:w-4/12 bg-slate-800 text-white font-bold rounded-3xl text-base"
+                @click="$store.grocery.clearItems()">Bersihkan
+                Daftar</button>
+        </div>
+        <template x-if="$store.grocery.totalItems() === 0">
+            <footer class="bg-orange-600 text-white text-center font-bold text-xl">
+                Daftar Belanjaan Masih Kosong!
+            </footer>
+        </template>
+        <template x-if="$store.grocery.totalItems() !== 0">
+            <footer class="bg-orange-600 text-white text-center font-bold text-xl">Ada <span
+                    x-text="$store.grocery.totalItems()"></span> barang di daftar belanjaan, <span
+                    x-text="$store.grocery.checkedItems()"></span>
+                barang sudah
+                dibeli (<span x-text="$store.grocery.percentage()"></span>%)
+            </footer>
+        </template>
+    </div>
+
+    <script>
+        document.addEventListener('alpine:init', () => {
+            Alpine.store('grocery', {
+                groceryItems: [
+                    {
+                        id: 1,
+                        name: 'Kopi Bubuk',
+                        quantity: 2,
+                        checked: true,
+                    },
+                    {
+                        id: 2,
+                        name: 'Gula Pasir',
+                        quantity: 5,
+                        checked: false,
+                    },
+                    {
+                        id: 3,
+                        name: 'Air Mineral',
+                        quantity: 3,
+                        checked: false,
+                    },
+                ],
+                totalItems() {
+                    return this.sortedItems.length;
+                },
+                checkedItems() {
+                    return this.sortedItems.filter((item) => item.checked).length;
+                },
+                percentage() {
+                    return Math.round((this.checkedItems() / this.totalItems()) * 100)
+                },
+                barang: '',
+                kty: 1,
+                sortedItems: [],
+                sortBy: 'input',
+                setSortBy(value) {
+                    this.sortBy = value;
+                    this.sortingItems(value);
+                },
+                sortingItems(value) {
+                    if (value === 'input') {
+                        this.sortedItems = this.groceryItems
+                    }
+                    if (value === 'name') {
+                        this.sortedItems = this.groceryItems.slice().sort((a, b) => a.name.localeCompare(b.name));
+                    }
+                    if (value === 'checked') {
+                        this.sortedItems = this.groceryItems.slice().sort((a, b) => a.checked - b.checked)
+                    }
+                },
+                deleteItem(index) {
+                    this.groceryItems.splice(index, 1);
+                },
+                submitItem() {
+                    if (!this.barang) return;
+                    this.groceryItems.push({
+                        id: Date.now(),
+                        name: this.barang,
+                        quantity: this.kty,
+                        checked: false
+                    });
+                    this.barang = '';
+                    this.kty = 1;
+                },
+                clearItems() {
+                    this.groceryItems = [];
+                }
+            })
+        })
+    </script>
+</body>
+
+</html>
