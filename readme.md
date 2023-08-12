@@ -10,4 +10,13 @@ Karena projek ini hanya latihan, jadi saya instalasi tailwindCSS & AlpineJS hany
 1. x-if pada AlpineJS tidak fleksible. Saat saya punya kondisi lebih dari satu, maka x-if harus ditulis manual berualang kali dengan kondisinya, dalam artian tidak bisa menggunakan elseif.
 1. Tantangan terbesar adalah saat coding sorting. Pada react, kondisi pada switch akan terus dijalankan ketika react re-render. Pada AlpineJS, Alpine tidak melakukan re-render, sehingga membuat saya kebingungan mengatasinya. Saya tahu ada x-effect dan $watch yang fungsinya relevan dengan permasalahan ini, tapi saya kurang paham penggunaannya dan bagaimana codingan baiknya. Tapi untungnya, setelah bereksperiment dengan banyak kesalahan, saya menemukan solusinya.
 
+# Teknologi yang digunakan
+
+1. AlpineJS
+2. TailwindCSS
+
+# Demo
+
+Demo: [https://belanjaan.sampurasun.my.id/](https://belanjaan.sampurasun.my.id/)
+
 # Terima Kasih
